@@ -19,6 +19,7 @@ int main(void)
     RaylibChessBoard board;
     loadChessBoard(&board);
     Vector2 closestSquare;
+    //change for github
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
