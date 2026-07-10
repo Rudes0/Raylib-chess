@@ -40,6 +40,6 @@ typedef struct {
 
 
 ChessBoard initChessBoard(void);   
-
-
+Vector2 checkClosestToMouse(ChessBoard chessBoard); 
+int abs(int val);
 #endif // ENGINE_H

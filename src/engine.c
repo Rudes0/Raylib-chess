@@ -73,10 +73,10 @@ Piece bKing = {
 };
 
 
-ChessBoard initChessBoard(void) 
+ChessBoard fnitChessBoard(void) 
 {
     ChessBoard chessBoard;
-    int xStartPosition = 450 + 72;
+    int xStartPosition = 450 + 36;
     int yStartPosition = 72;
     chessBoard.squares[0][0].position.x = xStartPosition;
     chessBoard.squares[0][0].position.y = yStartPosition; 
@@ -124,4 +124,41 @@ ChessBoard initChessBoard(void)
     chessBoard.squares[4][7].piece = wKing;
 
     return chessBoard;
+}
+
+void mouseMechanics(void)
+{
+        
+}
+
+Vector2 checkClosestToMouse(ChessBoard chessBoard)
+{
+    Vector2 mousePos = GetMousePosition();
+    Vector2 closestSquare = {0, 0};
+    for(int x = 0; x < 8; x++)
+    {
+        if(abs(mousePos.x - chessBoard.squares[x][0].position.x) < 116 / 2)
+        {
+            closestSquare.x = x;
+            break;
+        }
+    }
+    for(int y = 0; y < 8; y++)
+    {
+        if(abs(mousePos.y - chessBoard.squares[0][y].position.y) < 116 / 2)
+        {
+            closestSquare.y = y;
+            break;
+        }
+
+    }
+    return closestSquare;
+}
+
+int abs(int val)
+{
+    if(val == 0) return 0;
+    if(val > 0) return val;
+    if(val < 0) return -val;
+    return 0;
 }

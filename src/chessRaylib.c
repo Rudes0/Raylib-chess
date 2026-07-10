@@ -39,7 +39,7 @@ void loadChessBoard(RaylibChessBoard* raylibChessBoard)
 }
 void drawChessBoard(RaylibChessBoard raylibChessBoard)
 {
-    DrawTexture(raylibChessBoard.chessBoardTexture, 450, 0, WHITE);
+    DrawTexture(raylibChessBoard.chessBoardTexture, (1980 - 1080 - 71)/2, 0, WHITE);
     
     for(int i = 0; i < 8; i++)
     {
