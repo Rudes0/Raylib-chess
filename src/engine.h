@@ -25,7 +25,8 @@ typedef enum{
 typedef struct{
     PieceType type;
     PieceColor color;
-    bool hasMoved; 
+    bool hasMoved;
+    bool isPicked;
 }Piece;
 
 typedef struct {
@@ -35,11 +36,11 @@ typedef struct {
 
 typedef struct {
     Square squares[8][8];
-    
 }ChessBoard; 
 
+ChessBoard initChessBoard(void);
+Vector2 checkClosestToMouse(ChessBoard chessBoard);
+int Abs(int val);
+void grabPiece(ChessBoard* chessBoard, Vector2 closestSquare);
 
-ChessBoard initChessBoard(void);   
-Vector2 checkClosestToMouse(ChessBoard chessBoard); 
-int abs(int val);
 #endif // ENGINE_H

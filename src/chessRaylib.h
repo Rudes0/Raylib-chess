@@ -10,7 +10,7 @@ typedef struct {
 }RaylibChessBoard;
 
 void loadChessBoard(RaylibChessBoard* raylibChessBoard); // Initialization of all the textures of chess board
-void drawChessBoard(RaylibChessBoard raylibChessBoard); // update textures of chess board
+void drawChessBoard(RaylibChessBoard raylibChessBoard, int mouseX, int mouseY); // update textures of chess board
 void unloadChessBoard(RaylibChessBoard* raylibChessBoard);
 void drawsome(int a);
 #endif //CHESS_RAYLIB_H

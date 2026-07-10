@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include "src/chessRaylib.h"
+#include "src/engine.h"
 #include <stdio.h>
 
 //------------------------------------------------------------------------------------
@@ -32,13 +33,16 @@ int main(void)
         {
             closestSquare = checkClosestToMouse(board.chessBoardData);
             printf("closest x = %d, closest y = %d\n", (int)closestSquare.x, (int)closestSquare.y);
+            grabPiece(&board.chessBoardData, closestSquare);
         }
+        int mouseX = GetMouseX();
+        int mouseY = GetMouseY(); 
         //----------------------------------------------------------------------------------
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
             ClearBackground(RAYWHITE);
-            drawChessBoard(board);
+            drawChessBoard(board, mouseX, mouseY);
         EndDrawing();
         //----------------------------------------------------------------------------------
     }

@@ -1,8 +1,8 @@
 #include "chessRaylib.h"
+#include <stdio.h>
 
 void loadChessBoard(RaylibChessBoard* raylibChessBoard)
 {
-    
     Image chessBoardImage = LoadImage("assets/mychessboard.png");
     raylibChessBoard->chessBoardTexture = LoadTextureFromImage(chessBoardImage);
     UnloadImage(chessBoardImage);
@@ -23,7 +23,6 @@ void loadChessBoard(RaylibChessBoard* raylibChessBoard)
         "assets/black-queen.png",
         "assets/black-king.png"
         }};
-        
     for(int color = 0; color < pieceColorCount; color++)
     {
         for(int piece = 0; piece < pieceTypeCount; piece++)
@@ -33,14 +32,12 @@ void loadChessBoard(RaylibChessBoard* raylibChessBoard)
             UnloadImage(chessPieceImage);
         }
     }
-
     raylibChessBoard->chessBoardData = initChessBoard();
-    
 }
-void drawChessBoard(RaylibChessBoard raylibChessBoard)
+
+void drawChessBoard(RaylibChessBoard raylibChessBoard, int mouseX, int mouseY)
 {
     DrawTexture(raylibChessBoard.chessBoardTexture, (1980 - 1080 - 71)/2, 0, WHITE);
-    
     for(int i = 0; i < 8; i++)
     {
         for(int j = 0; j < 8; j++)
@@ -52,11 +49,27 @@ void drawChessBoard(RaylibChessBoard raylibChessBoard)
                 case pawn:
                     if (raylibChessBoard.chessBoardData.squares[i][j].piece.color == white)
                     {
-                        DrawTexture(raylibChessBoard.chessPieces[white][pawn], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        if(raylibChessBoard.chessBoardData.squares[i][j].piece.isPicked == true)
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[white][pawn], mouseX, mouseY, WHITE);
+                            printf("Drawing floating piece\n"); 
+                        }
+                        else
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[white][pawn], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        }
                     }
                     else
                     {
-                        DrawTexture(raylibChessBoard.chessPieces[black][pawn], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        if(raylibChessBoard.chessBoardData.squares[i][j].piece.isPicked == true)
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[black][pawn], mouseX, mouseY, WHITE);
+                        }
+                        else
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[black][pawn], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        }
+;
                     }
                     break;
                 case knight:
@@ -119,7 +132,6 @@ void drawChessBoard(RaylibChessBoard raylibChessBoard)
 void unloadChessBoard(RaylibChessBoard* raylibChessBoard)
 {
     UnloadTexture(raylibChessBoard->chessBoardTexture);
-
     for(int color = 0; color < pieceColorCount; color++)
     {
         for(int piece = 0; piece < pieceTypeCount; piece++)
