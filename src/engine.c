@@ -1,4 +1,5 @@
 #include "engine.h"
+#include "chessRaylib.h"
 #include <raylib.h>
 #include <stdio.h>
 
@@ -86,6 +87,11 @@ Piece bKing = {
     .isPicked = false
 };
 
+Piece emptyPiece = {
+    .type = empty,
+    .color = noColor,
+};
+
 ChessBoard initChessBoard(void) 
 {
     ChessBoard chessBoard;
@@ -134,21 +140,29 @@ ChessBoard initChessBoard(void)
     return chessBoard;
 }
 
-void mouseMechanics(void)
+void gameUpdate(ChessBoard* chessBoardData)
 {
-        
-}
-
-Vector2 checkClosestToMouse(ChessBoard chessBoard)
-{
-    Vector2 mousePos;
-    mousePos.x = GetMouseX();
-    mousePos.y = GetMouseY();
-
-    Vector2 closestSquare = {0, 0};
+    Vector2 mousePostion;
+    mousePostion.x = GetMouseX();
+    mousePostion.y = GetMouseY();
+    Vector2 closestSquare = checkClosestToMouse(*chessBoardData, mousePostion);
+    grabPiece(chessBoardData, closestSquare);
     for(int x = 0; x < 8; x++)
     {
-        if(Abs(mousePos.x - (int)chessBoard.squares[x][0].position.x - (int)(SQUARE_SIZE / 2)) < SQUARE_SIZE / 2)
+        for(int y = 0; y < 8; y++)
+        {
+            relasePiece(chessBoardData, closestSquare, x, y);
+        }
+    }
+}
+
+Vector2 checkClosestToMouse(ChessBoard chessBoard, Vector2 mousePos)
+{
+    Vector2 closestSquare = {0, 0};
+    printf("mouse position x = %f, y = %f\n", mousePos.x, mousePos.y); 
+    for(int x = 0; x < 8; x++)
+    {
+        if(Abs((int)mousePos.x - (int)chessBoard.squares[x][0].position.x - (int)(SQUARE_SIZE / 2)) < SQUARE_SIZE / 2)
         {
             closestSquare.x = x;
             break;
@@ -156,7 +170,7 @@ Vector2 checkClosestToMouse(ChessBoard chessBoard)
     }
     for(int y = 0; y < 8; y++)
     {
-        if(Abs(mousePos.y - (int)chessBoard.squares[0][y].position.y - (int)(SQUARE_SIZE / 2)) < SQUARE_SIZE / 2)
+        if(Abs((int)mousePos.y - (int)chessBoard.squares[0][y].position.y - (int)(SQUARE_SIZE / 2)) < SQUARE_SIZE / 2)
         {
             closestSquare.y = y;
             break;
@@ -167,15 +181,32 @@ Vector2 checkClosestToMouse(ChessBoard chessBoard)
 
 void grabPiece(ChessBoard* chessBoard, Vector2 closestSquare)
 {
-    if(chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.type != empty)
+    if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
     {
-        if(chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.isPicked == false)
+        if(chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.type != empty)
         {
-            printf("Picked peace of type %d\n", chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.type);
-            chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.isPicked = true;
+            if(chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.isPicked == false)
+            {
+                chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.isPicked = true;
+            }
         }
     }
 }
+
+void relasePiece(ChessBoard* chessBoard, Vector2 closestSquare, int x, int y)
+{
+    if(chessBoard->squares[x][y].piece.type != empty)
+    {
+        if(chessBoard->squares[x][y].piece.isPicked == true && IsMouseButtonUp(MOUSE_LEFT_BUTTON))
+        {
+            Piece tempPiece = chessBoard->squares[x][y].piece;
+            chessBoard->squares[x][y].piece = emptyPiece; 
+            chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece = tempPiece; 
+            chessBoard->squares[x][y].piece.isPicked = false;
+        }
+    }
+}
+
 
 int Abs(int val)
 {

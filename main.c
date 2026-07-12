@@ -19,8 +19,6 @@ int main(void)
     ToggleBorderlessWindowed();   
     RaylibChessBoard board;
     loadChessBoard(&board);
-    Vector2 closestSquare;
-    //change for github
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
@@ -29,12 +27,7 @@ int main(void)
     {
         // Update
         //----------------------------------------------------------------------------------
-        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-        {
-            closestSquare = checkClosestToMouse(board.chessBoardData);
-            printf("closest x = %d, closest y = %d\n", (int)closestSquare.x, (int)closestSquare.y);
-            grabPiece(&board.chessBoardData, closestSquare);
-        }
+        gameUpdate(&board.chessBoardData);
         int mouseX = GetMouseX();
         int mouseY = GetMouseY(); 
         //----------------------------------------------------------------------------------
@@ -42,7 +35,7 @@ int main(void)
         //----------------------------------------------------------------------------------
         BeginDrawing();
             ClearBackground(RAYWHITE);
-            drawChessBoard(board, mouseX, mouseY);
+            drawChessBoard(board, mouseX - SQUARE_SIZE / 2, mouseY - SQUARE_SIZE / 2);
         EndDrawing();
         //----------------------------------------------------------------------------------
     }

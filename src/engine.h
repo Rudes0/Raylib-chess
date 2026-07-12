@@ -19,7 +19,8 @@ typedef enum{
 typedef enum{
     white,
     black,
-    pieceColorCount
+    pieceColorCount,
+    noColor
 }PieceColor;
 
 typedef struct{
@@ -39,8 +40,12 @@ typedef struct {
 }ChessBoard; 
 
 ChessBoard initChessBoard(void);
-Vector2 checkClosestToMouse(ChessBoard chessBoard);
-int Abs(int val);
+
+void gameUpdate(ChessBoard* board);
 void grabPiece(ChessBoard* chessBoard, Vector2 closestSquare);
+void relasePiece(ChessBoard* chessBoard, Vector2 closestSquare, int x, int y);
+Vector2 checkClosestToMouse(ChessBoard chessBoard, Vector2 mousePos);
+Piece choosePiece(PieceType type);
+int Abs(int val);
 
 #endif // ENGINE_H

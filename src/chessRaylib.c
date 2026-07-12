@@ -52,7 +52,6 @@ void drawChessBoard(RaylibChessBoard raylibChessBoard, int mouseX, int mouseY)
                         if(raylibChessBoard.chessBoardData.squares[i][j].piece.isPicked == true)
                         {
                             DrawTexture(raylibChessBoard.chessPieces[white][pawn], mouseX, mouseY, WHITE);
-                            printf("Drawing floating piece\n"); 
                         }
                         else
                         {
@@ -69,57 +68,131 @@ void drawChessBoard(RaylibChessBoard raylibChessBoard, int mouseX, int mouseY)
                         {
                             DrawTexture(raylibChessBoard.chessPieces[black][pawn], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
                         }
-;
                     }
                     break;
                 case knight:
-                    if(raylibChessBoard.chessBoardData.squares[i][j].piece.color == white)
+                    if (raylibChessBoard.chessBoardData.squares[i][j].piece.color == white)
                     {
-                        DrawTexture(raylibChessBoard.chessPieces[white][knight], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        if(raylibChessBoard.chessBoardData.squares[i][j].piece.isPicked == true)
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[white][knight], mouseX, mouseY, WHITE);
+                            printf("Drawing floating piece\n"); 
+                        }
+                        else
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[white][knight], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        }
                     }
                     else
                     {
-                        DrawTexture(raylibChessBoard.chessPieces[black][knight], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        if(raylibChessBoard.chessBoardData.squares[i][j].piece.isPicked == true)
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[black][knight], mouseX, mouseY, WHITE);
+                        }
+                        else
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[black][knight], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        }
                     }
                     break;
                 case bishop:
-                    if(raylibChessBoard.chessBoardData.squares[i][j].piece.color == white)
+                    if (raylibChessBoard.chessBoardData.squares[i][j].piece.color == white)
                     {
-                        DrawTexture(raylibChessBoard.chessPieces[white][bishop], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        if(raylibChessBoard.chessBoardData.squares[i][j].piece.isPicked == true)
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[white][bishop], mouseX, mouseY, WHITE);
+                            printf("Drawing floating piece\n"); 
+                        }
+                        else
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[white][bishop], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        }
                     }
                     else
                     {
-                        DrawTexture(raylibChessBoard.chessPieces[black][bishop], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        if(raylibChessBoard.chessBoardData.squares[i][j].piece.isPicked == true)
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[black][bishop], mouseX, mouseY, WHITE);
+                        }
+                        else
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[black][bishop], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        }
                     }
                     break;
                 case rook:
-                    if(raylibChessBoard.chessBoardData.squares[i][j].piece.color == white)
+                    if (raylibChessBoard.chessBoardData.squares[i][j].piece.color == white)
                     {
-                        DrawTexture(raylibChessBoard.chessPieces[white][rook], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        if(raylibChessBoard.chessBoardData.squares[i][j].piece.isPicked == true)
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[white][rook], mouseX, mouseY, WHITE);
+                            printf("Drawing floating piece\n"); 
+                        }
+                        else
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[white][rook], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        }
                     }
                     else
                     {
-                        DrawTexture(raylibChessBoard.chessPieces[black][rook], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        if(raylibChessBoard.chessBoardData.squares[i][j].piece.isPicked == true)
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[black][rook], mouseX, mouseY, WHITE);
+                        }
+                        else
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[black][rook], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        }
                     }
                     break;
                 case queen:
-                    if(raylibChessBoard.chessBoardData.squares[i][j].piece.color == white)
+                    if (raylibChessBoard.chessBoardData.squares[i][j].piece.color == white)
                     {
-                        DrawTexture(raylibChessBoard.chessPieces[white][queen], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        if(raylibChessBoard.chessBoardData.squares[i][j].piece.isPicked == true)
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[white][queen], mouseX, mouseY, WHITE);
+                            printf("Drawing floating piece\n"); 
+                        }
+                        else
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[white][queen], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        }
                     }
                     else
                     {
-                        DrawTexture(raylibChessBoard.chessPieces[black][queen], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        if(raylibChessBoard.chessBoardData.squares[i][j].piece.isPicked == true)
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[black][queen], mouseX, mouseY, WHITE);
+                        }
+                        else
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[black][queen], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        }
                     }
                     break;
                 case king:
-                    if(raylibChessBoard.chessBoardData.squares[i][j].piece.color == white)
+                    if (raylibChessBoard.chessBoardData.squares[i][j].piece.color == white)
                     {
-                        DrawTexture(raylibChessBoard.chessPieces[white][king], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        if(raylibChessBoard.chessBoardData.squares[i][j].piece.isPicked == true)
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[white][king], mouseX, mouseY, WHITE);
+                            printf("Drawing floating piece\n"); 
+                        }
+                        else
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[white][king], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        }
                     }
                     else
                     {
-                        DrawTexture(raylibChessBoard.chessPieces[black][king], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        if(raylibChessBoard.chessBoardData.squares[i][j].piece.isPicked == true)
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[black][king], mouseX, mouseY, WHITE);
+                        }
+                        else
+                        {
+                            DrawTexture(raylibChessBoard.chessPieces[black][king], raylibChessBoard.chessBoardData.squares[i][j].position.x, raylibChessBoard.chessBoardData.squares[i][j].position.y , WHITE);
+                        }
                     }
                     break;
                 default:
