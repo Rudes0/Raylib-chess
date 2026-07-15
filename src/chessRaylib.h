@@ -5,6 +5,7 @@
 
 typedef struct {
     ChessBoard chessBoardData;
+    GrabbedPiece grabbedPieceData;
     Texture2D chessBoardTexture;
     Texture2D chessPieces[pieceColorCount][pieceTypeCount];
 }RaylibChessBoard;

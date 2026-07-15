@@ -27,7 +27,7 @@ int main(void)
     {
         // Update
         //----------------------------------------------------------------------------------
-        gameUpdate(&board.chessBoardData);
+        gameUpdate(&board.chessBoardData, &board.grabbedPieceData);
         int mouseX = GetMouseX();
         int mouseY = GetMouseY(); 
         //----------------------------------------------------------------------------------

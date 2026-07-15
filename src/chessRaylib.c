@@ -76,7 +76,6 @@ void drawChessBoard(RaylibChessBoard raylibChessBoard, int mouseX, int mouseY)
                         if(raylibChessBoard.chessBoardData.squares[i][j].piece.isPicked == true)
                         {
                             DrawTexture(raylibChessBoard.chessPieces[white][knight], mouseX, mouseY, WHITE);
-                            printf("Drawing floating piece\n"); 
                         }
                         else
                         {
@@ -101,7 +100,6 @@ void drawChessBoard(RaylibChessBoard raylibChessBoard, int mouseX, int mouseY)
                         if(raylibChessBoard.chessBoardData.squares[i][j].piece.isPicked == true)
                         {
                             DrawTexture(raylibChessBoard.chessPieces[white][bishop], mouseX, mouseY, WHITE);
-                            printf("Drawing floating piece\n"); 
                         }
                         else
                         {
@@ -126,7 +124,6 @@ void drawChessBoard(RaylibChessBoard raylibChessBoard, int mouseX, int mouseY)
                         if(raylibChessBoard.chessBoardData.squares[i][j].piece.isPicked == true)
                         {
                             DrawTexture(raylibChessBoard.chessPieces[white][rook], mouseX, mouseY, WHITE);
-                            printf("Drawing floating piece\n"); 
                         }
                         else
                         {
@@ -151,7 +148,6 @@ void drawChessBoard(RaylibChessBoard raylibChessBoard, int mouseX, int mouseY)
                         if(raylibChessBoard.chessBoardData.squares[i][j].piece.isPicked == true)
                         {
                             DrawTexture(raylibChessBoard.chessPieces[white][queen], mouseX, mouseY, WHITE);
-                            printf("Drawing floating piece\n"); 
                         }
                         else
                         {
@@ -176,7 +172,6 @@ void drawChessBoard(RaylibChessBoard raylibChessBoard, int mouseX, int mouseY)
                         if(raylibChessBoard.chessBoardData.squares[i][j].piece.isPicked == true)
                         {
                             DrawTexture(raylibChessBoard.chessPieces[white][king], mouseX, mouseY, WHITE);
-                            printf("Drawing floating piece\n"); 
                         }
                         else
                         {

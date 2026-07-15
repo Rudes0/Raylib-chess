@@ -90,6 +90,8 @@ Piece bKing = {
 Piece emptyPiece = {
     .type = empty,
     .color = noColor,
+    .hasMoved = false,
+    .isPicked = false
 };
 
 ChessBoard initChessBoard(void) 
@@ -140,26 +142,35 @@ ChessBoard initChessBoard(void)
     return chessBoard;
 }
 
-void gameUpdate(ChessBoard* chessBoardData)
+void gameUpdate(ChessBoard* chessBoardData, GrabbedPiece* grabbedPieceData)
 {
     Vector2 mousePostion;
     mousePostion.x = GetMouseX();
     mousePostion.y = GetMouseY();
-    Vector2 closestSquare = checkClosestToMouse(*chessBoardData, mousePostion);
-    grabPiece(chessBoardData, closestSquare);
-    for(int x = 0; x < 8; x++)
+    Position closestSquare = checkClosestToMouse(*chessBoardData, mousePostion);
+    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
-        for(int y = 0; y < 8; y++)
+        grabPiece(chessBoardData, closestSquare, grabbedPieceData);
+    }
+
+    if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+    {
+        if(isValidMove(*chessBoardData, closestSquare, *grabbedPieceData))
         {
-            relasePiece(chessBoardData, closestSquare, x, y);
+            relasePiece(chessBoardData, closestSquare, grabbedPieceData->piecePosition);
+            ps_free(grabbedPieceData->possibleMoves);
+        }
+        else
+        {
+            relasePiece(chessBoardData, grabbedPieceData->piecePosition, grabbedPieceData->piecePosition);
+            ps_free(grabbedPieceData->possibleMoves);
         }
     }
 }
 
-Vector2 checkClosestToMouse(ChessBoard chessBoard, Vector2 mousePos)
+Position checkClosestToMouse(ChessBoard chessBoard, Vector2 mousePos)
 {
-    Vector2 closestSquare = {0, 0};
-    printf("mouse position x = %f, y = %f\n", mousePos.x, mousePos.y); 
+    Position closestSquare = {0, 0};
     for(int x = 0; x < 8; x++)
     {
         if(Abs((int)mousePos.x - (int)chessBoard.squares[x][0].position.x - (int)(SQUARE_SIZE / 2)) < SQUARE_SIZE / 2)
@@ -179,32 +190,87 @@ Vector2 checkClosestToMouse(ChessBoard chessBoard, Vector2 mousePos)
     return closestSquare;
 }
 
-void grabPiece(ChessBoard* chessBoard, Vector2 closestSquare)
+void grabPiece(ChessBoard* chessBoard, Position closestSquare, GrabbedPiece* grabbedPieceData)
 {
-    if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    if(chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.type != empty)
     {
-        if(chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.type != empty)
+        if(chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.isPicked == false)
         {
-            if(chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.isPicked == false)
-            {
-                chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.isPicked = true;
-            }
+            grabbedPieceData->piecePosition = closestSquare;
+            grabbedPieceData->pieceColor = getPieceColor(*chessBoard, closestSquare);
+            grabbedPieceData->pieceType = getPieceType(*chessBoard, closestSquare);
+            grabbedPieceData->possibleMoves = getValidMoves(*chessBoard, *grabbedPieceData);
+            chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.isPicked = true;
         }
     }
 }
 
-void relasePiece(ChessBoard* chessBoard, Vector2 closestSquare, int x, int y)
+void relasePiece(ChessBoard* chessBoard, Position closestSquare, Position piecePosition)
 {
-    if(chessBoard->squares[x][y].piece.type != empty)
+    if(chessBoard->squares[piecePosition.x][piecePosition.y].piece.type != empty)
     {
-        if(chessBoard->squares[x][y].piece.isPicked == true && IsMouseButtonUp(MOUSE_LEFT_BUTTON))
+        if(chessBoard->squares[piecePosition.x][piecePosition.y].piece.isPicked == true && IsMouseButtonUp(MOUSE_LEFT_BUTTON))
         {
-            Piece tempPiece = chessBoard->squares[x][y].piece;
-            chessBoard->squares[x][y].piece = emptyPiece; 
+            Piece tempPiece = chessBoard->squares[piecePosition.x][piecePosition.y].piece;
+            chessBoard->squares[piecePosition.x][piecePosition.y].piece = emptyPiece; 
             chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece = tempPiece; 
-            chessBoard->squares[x][y].piece.isPicked = false;
+            chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.isPicked = false;
         }
     }
+}
+
+int getPieceType(ChessBoard chessBoard, Position postion)
+{
+    return chessBoard.squares[postion.x][postion.y].piece.type;
+}
+
+int getPieceColor(ChessBoard chessBoard, Position postion)
+{
+    return chessBoard.squares[postion.x][postion.y].piece.color;
+}
+
+int isValidMove(ChessBoard chessBoard, Position closestSquare, GrabbedPiece grabbedPiece)
+{
+    for(int i = 0; i < grabbedPiece.possibleMoves.lenght; ++i)
+    {
+        if(grabbedPiece.possibleMoves.data[i].x == closestSquare.x && grabbedPiece.possibleMoves.data[i].y == closestSquare.y) return 1;
+    }
+    return 0;
+}
+
+Position wPawnMoves[] =
+{
+    {0, -1},
+    {-1, -1},
+    {1, -1},
+    {0, -2}
+};
+
+ps_vector getValidMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece)
+{
+    ps_vector validMoves;
+    ps_init(validMoves);
+    int dirCount = sizeof(wPawnMoves) / sizeof(wPawnMoves[0]);
+    for(int i = 0; i < dirCount; i++)
+    {
+        Position nextPosition = {grabbedPiece.piecePosition.x + wPawnMoves[i].x, grabbedPiece.piecePosition.y + wPawnMoves[i].y};
+        if(!isInsideBoard(nextPosition)) continue;
+        if(!isPositionEmpty(chessBoard, nextPosition)) continue;
+        ps_append(validMoves,nextPosition);
+    }
+    return validMoves;
+}
+
+int isInsideBoard(Position position)
+{
+    if((position.x >= 0 && position.x < 8) && (position.y >= 0 && position.y < 8)) return 1;
+    else return 0;
+}
+
+int isPositionEmpty(ChessBoard chessBoard, Position position)
+{
+    if(chessBoard.squares[position.x][position.y].piece.type == empty) return 1;
+    else return 0;
 }
 
 
