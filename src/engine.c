@@ -88,7 +88,7 @@ Piece bKing = {
 };
 
 Piece emptyPiece = {
-    .type = empty,
+    .type = emptyType,
     .color = noColor,
     .hasMoved = false,
     .isPicked = false
@@ -109,7 +109,7 @@ ChessBoard initChessBoard(void)
             if((x == 0) && (y == 0)) continue;
             chessBoard.squares[x][y].position.x = xStartPosition + SQUARE_SIZE * x;
             chessBoard.squares[x][y].position.y = yStartPosition + SQUARE_SIZE * y;
-            chessBoard.squares[x][y].piece.type = empty;
+            chessBoard.squares[x][y].piece = emptyPiece;
         }
     }
     //setup pawns
@@ -148,23 +148,40 @@ void gameUpdate(ChessBoard* chessBoardData, GrabbedPiece* grabbedPieceData)
     mousePostion.x = GetMouseX();
     mousePostion.y = GetMouseY();
     Position closestSquare = checkClosestToMouse(*chessBoardData, mousePostion);
-    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    if(isMouseInsideBoard(mousePostion))
     {
+        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+        printf("mouse pos x = %f, y = %f\n", mousePostion.x, mousePostion.y);
         grabPiece(chessBoardData, closestSquare, grabbedPieceData);
+        }
+        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+        {
+            printf("Square piece type is %d\n", chessBoardData->squares[closestSquare.x][closestSquare.y].piece.type); 
+            printf("Relased piece type is %d\n", grabbedPieceData->pieceType);
+            if(grabbedPieceData->pieceType != emptyType)
+            {
+                printf("Relasing not empty piece on square x %d, y %d\n", closestSquare.x, closestSquare.y);
+                if(!isMouseInsideBoard(mousePostion)) relasePiece(chessBoardData, grabbedPieceData->piecePosition, grabbedPieceData->piecePosition);
+                else if(isValidMove(*chessBoardData, closestSquare, *grabbedPieceData))
+                {
+                    relasePiece(chessBoardData, closestSquare, grabbedPieceData->piecePosition);
+                }
+                else
+                {
+                    relasePiece(chessBoardData, grabbedPieceData->piecePosition, grabbedPieceData->piecePosition);
+                }
+            }
+            else
+            {
+                printf("Grabbing empty piece on square x %d y %d\n", closestSquare.x, closestSquare.y); 
+            }
+        ps_free(grabbedPieceData->possibleMoves);
+        }
     }
-
-    if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+    else
     {
-        if(isValidMove(*chessBoardData, closestSquare, *grabbedPieceData))
-        {
-            relasePiece(chessBoardData, closestSquare, grabbedPieceData->piecePosition);
-            ps_free(grabbedPieceData->possibleMoves);
-        }
-        else
-        {
-            relasePiece(chessBoardData, grabbedPieceData->piecePosition, grabbedPieceData->piecePosition);
-            ps_free(grabbedPieceData->possibleMoves);
-        }
+
     }
 }
 
@@ -173,7 +190,7 @@ Position checkClosestToMouse(ChessBoard chessBoard, Vector2 mousePos)
     Position closestSquare = {0, 0};
     for(int x = 0; x < 8; x++)
     {
-        if(Abs((int)mousePos.x - (int)chessBoard.squares[x][0].position.x - (int)(SQUARE_SIZE / 2)) < SQUARE_SIZE / 2)
+        if(Abs(mousePos.x - chessBoard.squares[x][0].position.x - ((float)SQUARE_SIZE / 2 ))<= (float)SQUARE_SIZE / 2)
         {
             closestSquare.x = x;
             break;
@@ -181,7 +198,7 @@ Position checkClosestToMouse(ChessBoard chessBoard, Vector2 mousePos)
     }
     for(int y = 0; y < 8; y++)
     {
-        if(Abs((int)mousePos.y - (int)chessBoard.squares[0][y].position.y - (int)(SQUARE_SIZE / 2)) < SQUARE_SIZE / 2)
+        if(Abs(mousePos.y - chessBoard.squares[0][y].position.y - ((float)SQUARE_SIZE / 2)) <= (float)SQUARE_SIZE / 2)
         {
             closestSquare.y = y;
             break;
@@ -190,30 +207,39 @@ Position checkClosestToMouse(ChessBoard chessBoard, Vector2 mousePos)
     return closestSquare;
 }
 
+int isMouseInsideBoard(Vector2 mousePos)
+{
+    if((mousePos.x > LEFT_BOARD_EDGE || mousePos.x < RIGHT_BOARD_EDGE) && (mousePos.y > TOP_BOARD_EDGE || mousePos.y < BOTTOM_BOARD_EDGE)) return 1; 
+    return 0;
+}
+
 void grabPiece(ChessBoard* chessBoard, Position closestSquare, GrabbedPiece* grabbedPieceData)
 {
-    if(chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.type != empty)
-    {
+    //if(chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.type != emptyType)
+    //{
         if(chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.isPicked == false)
         {
             grabbedPieceData->piecePosition = closestSquare;
             grabbedPieceData->pieceColor = getPieceColor(*chessBoard, closestSquare);
             grabbedPieceData->pieceType = getPieceType(*chessBoard, closestSquare);
+            grabbedPieceData->hasMoved = getPieceHasMoved(*chessBoard, closestSquare);
+//            printf("grab piece type %d\n", grabbedPieceData->pieceType);
             grabbedPieceData->possibleMoves = getValidMoves(*chessBoard, *grabbedPieceData);
             chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.isPicked = true;
         }
-    }
+    //}
 }
 
 void relasePiece(ChessBoard* chessBoard, Position closestSquare, Position piecePosition)
 {
-    if(chessBoard->squares[piecePosition.x][piecePosition.y].piece.type != empty)
+    if(chessBoard->squares[piecePosition.x][piecePosition.y].piece.type != emptyType)
     {
         if(chessBoard->squares[piecePosition.x][piecePosition.y].piece.isPicked == true && IsMouseButtonUp(MOUSE_LEFT_BUTTON))
         {
             Piece tempPiece = chessBoard->squares[piecePosition.x][piecePosition.y].piece;
             chessBoard->squares[piecePosition.x][piecePosition.y].piece = emptyPiece; 
-            chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece = tempPiece; 
+            chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece = tempPiece;
+            chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.hasMoved = true;
             chessBoard->squares[(int)closestSquare.x][(int)closestSquare.y].piece.isPicked = false;
         }
     }
@@ -229,8 +255,14 @@ int getPieceColor(ChessBoard chessBoard, Position postion)
     return chessBoard.squares[postion.x][postion.y].piece.color;
 }
 
+int getPieceHasMoved(ChessBoard chessBoard, Position position)
+{
+    return chessBoard.squares[position.x][position.y].piece.hasMoved;
+}
+
 int isValidMove(ChessBoard chessBoard, Position closestSquare, GrabbedPiece grabbedPiece)
 {
+    if(grabbedPiece.possibleMoves.data == NULL) return 0;
     for(int i = 0; i < grabbedPiece.possibleMoves.lenght; ++i)
     {
         if(grabbedPiece.possibleMoves.data[i].x == closestSquare.x && grabbedPiece.possibleMoves.data[i].y == closestSquare.y) return 1;
@@ -238,46 +270,619 @@ int isValidMove(ChessBoard chessBoard, Position closestSquare, GrabbedPiece grab
     return 0;
 }
 
-Position wPawnMoves[] =
+/*
+int isValidMoveWhitePawn(ChessBoard chessBoard, Position closestSquare, GrabbedPiece grabbedPiece)
 {
-    {0, -1},
-    {-1, -1},
-    {1, -1},
-    {0, -2}
-};
+    for(int i = 0; i < grabbedPiece.possibleMoves.lenght; ++i)
+    {
+        //check for to 2 move
+        if(grabbedPiece.possibleMoves.data[i].x == -1 && (grabbedPiece.possibleMoves.data[i].y == -1 || grabbedPiece.possibleMoves.data[i].y == 1))
+        {
+//check if there is a black piece
+            if(chessBoard.squares
+        }
 
+        if(grabbedPiece.possibleMoves.data[i].x == closestSquare.x && grabbedPiece.possibleMoves.data[i].y == closestSquare.y) return 1;
+    }
+    return 0;
+
+}
+*/
 ps_vector getValidMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece)
 {
+    if(grabbedPiece.pieceType == pawn && grabbedPiece.pieceColor == white) return getValidWPawnMoves(chessBoard, grabbedPiece);
+    if(grabbedPiece.pieceType == pawn && grabbedPiece.pieceColor == black) return getValidBPawnMoves(chessBoard, grabbedPiece);
+    if(grabbedPiece.pieceType == knight) return getValidKnightMoves(chessBoard, grabbedPiece);
+    if(grabbedPiece.pieceType == bishop) return getValidBishopMoves(chessBoard, grabbedPiece);
+    if(grabbedPiece.pieceType == rook) return getValidRookMoves(chessBoard, grabbedPiece);
+    if(grabbedPiece.pieceType == queen) return getValidQueenMoves(chessBoard, grabbedPiece);
+    if(grabbedPiece.pieceType == king) return getValidKingMoves(chessBoard, grabbedPiece);
     ps_vector validMoves;
     ps_init(validMoves);
-    int dirCount = sizeof(wPawnMoves) / sizeof(wPawnMoves[0]);
-    for(int i = 0; i < dirCount; i++)
-    {
-        Position nextPosition = {grabbedPiece.piecePosition.x + wPawnMoves[i].x, grabbedPiece.piecePosition.y + wPawnMoves[i].y};
-        if(!isInsideBoard(nextPosition)) continue;
-        if(!isPositionEmpty(chessBoard, nextPosition)) continue;
-        ps_append(validMoves,nextPosition);
-    }
     return validMoves;
 }
 
-int isInsideBoard(Position position)
+ps_vector getValidWPawnMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece)
+{
+    ps_vector validMoves;
+    ps_init(validMoves);
+    // simple forward move 
+    Position nextPosition = {grabbedPiece.piecePosition.x + 0, grabbedPiece.piecePosition.y - 1};
+    if(isPositionEmpty(chessBoard, grabbedPiece, nextPosition)) ps_append(validMoves, nextPosition);
+
+    // long move
+    nextPosition.x = grabbedPiece.piecePosition.x + 0;
+    nextPosition.y = grabbedPiece.piecePosition.y - 2;
+    Position previousPosition = nextPosition;
+    previousPosition.y = grabbedPiece.piecePosition.y - 1;
+    if(isPositionEmpty(chessBoard, grabbedPiece, previousPosition) 
+    && isPositionEmpty(chessBoard, grabbedPiece, nextPosition) 
+    && (!grabbedPiece.hasMoved)) 
+    ps_append(validMoves, nextPosition);
+    
+    // taking enemy piece left
+    nextPosition.x = grabbedPiece.piecePosition.x - 1;
+    nextPosition.y = grabbedPiece.piecePosition.y - 1;
+
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition)) ps_append(validMoves, nextPosition);
+
+    // taking enemy piece right
+    nextPosition.x = grabbedPiece.piecePosition.x + 1;
+    nextPosition.y = grabbedPiece.piecePosition.y - 1;
+
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition)) ps_append(validMoves, nextPosition);
+
+    //if(!isInsideBoard(nextPosition))
+    //ps_append(validMoves, nextPosition);
+
+    return validMoves;
+}
+
+ps_vector getValidBPawnMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece)
+{
+    ps_vector validMoves;
+    ps_init(validMoves);
+    // simple forward move 
+    Position nextPosition = {grabbedPiece.piecePosition.x + 0, grabbedPiece.piecePosition.y + 1};
+    
+    if(isPositionEmpty(chessBoard, grabbedPiece, nextPosition)) ps_append(validMoves, nextPosition);
+
+    // long move
+    nextPosition.x = grabbedPiece.piecePosition.x + 0;
+    nextPosition.y = grabbedPiece.piecePosition.y + 2;
+    Position previousPosition = nextPosition;
+    previousPosition.y = grabbedPiece.piecePosition.y + 1;
+
+    if(isPositionEmpty(chessBoard, grabbedPiece, previousPosition) 
+    && isPositionEmpty(chessBoard, grabbedPiece, nextPosition) 
+    && (!grabbedPiece.hasMoved)) 
+    ps_append(validMoves, nextPosition);
+    
+    // taking enemy piece left
+    nextPosition.x = grabbedPiece.piecePosition.x - 1;
+    nextPosition.y = grabbedPiece.piecePosition.y + 1;
+
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition)) ps_append(validMoves, nextPosition);
+
+    // taking enemy piece right
+    nextPosition.x = grabbedPiece.piecePosition.x + 1;
+    nextPosition.y = grabbedPiece.piecePosition.y + 1;
+
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition)) ps_append(validMoves, nextPosition);
+
+    //if(!isInsideBoard(nextPosition))
+    //ps_append(validMoves, nextPosition);
+
+    return validMoves;
+
+}
+
+ps_vector getValidKnightMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece)
+{
+    ps_vector validMoves;
+    ps_init(validMoves);
+    //front left move
+    Position nextPosition = {grabbedPiece.piecePosition.x - 1, grabbedPiece.piecePosition.y - 2};
+    
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition) || isPositionEmpty(chessBoard, grabbedPiece, nextPosition)) ps_append(validMoves, nextPosition);
+    
+    //front right move
+    nextPosition.x = grabbedPiece.piecePosition.x + 1;
+    nextPosition.y = grabbedPiece.piecePosition.y - 2;
+    
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition) || isPositionEmpty(chessBoard, grabbedPiece, nextPosition)) ps_append(validMoves, nextPosition);
+   
+    //left top move
+    nextPosition.x = grabbedPiece.piecePosition.x - 2;
+    nextPosition.y = grabbedPiece.piecePosition.y - 1;
+    
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition) || isPositionEmpty(chessBoard, grabbedPiece, nextPosition)) ps_append(validMoves, nextPosition);
+    
+    //left bottom move
+    nextPosition.x = grabbedPiece.piecePosition.x - 2;
+    nextPosition.y = grabbedPiece.piecePosition.y + 1;
+    
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition) || isPositionEmpty(chessBoard, grabbedPiece, nextPosition)) ps_append(validMoves, nextPosition);
+    
+    //bottom left move 
+    nextPosition.x = grabbedPiece.piecePosition.x - 1;
+    nextPosition.y = grabbedPiece.piecePosition.y + 2;
+    
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition) || isPositionEmpty(chessBoard, grabbedPiece, nextPosition)) ps_append(validMoves, nextPosition);
+    
+    //bottom right move 
+    nextPosition.x = grabbedPiece.piecePosition.x + 1;
+    nextPosition.y = grabbedPiece.piecePosition.y + 2;
+    
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition) || isPositionEmpty(chessBoard, grabbedPiece, nextPosition)) ps_append(validMoves, nextPosition);
+    
+    //right bottom move
+    nextPosition.x = grabbedPiece.piecePosition.x + 2;
+    nextPosition.y = grabbedPiece.piecePosition.y + 1;
+    
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition) || isPositionEmpty(chessBoard, grabbedPiece, nextPosition)) ps_append(validMoves, nextPosition);
+
+    //right top move
+    nextPosition.x = grabbedPiece.piecePosition.x + 2;
+    nextPosition.y = grabbedPiece.piecePosition.y - 1;
+    
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition) || isPositionEmpty(chessBoard, grabbedPiece, nextPosition)) ps_append(validMoves, nextPosition);
+    
+    return validMoves;
+}
+
+ps_vector getValidBishopMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece)
+{
+    ps_vector validMoves;
+    ps_init(validMoves);
+    Position nextPosition;
+    int xOffset = -1;
+    int yOffset = -1;
+    //diagonal top left
+    nextPosition.x = grabbedPiece.piecePosition.x + xOffset;
+    nextPosition.y = grabbedPiece.piecePosition.y + yOffset;
+    while(isMoveInsideBoard(nextPosition))
+    {
+        if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition))
+        {
+            ps_append(validMoves, nextPosition);
+            break;
+        }
+        else if(isPositionFriendly(chessBoard, grabbedPiece, nextPosition)) break;
+        ps_append(validMoves, nextPosition);
+        nextPosition.x += xOffset;
+        nextPosition.y += yOffset;
+    }
+    
+    xOffset = -1;
+    yOffset = 1;
+    //diagonal bottom left
+    nextPosition.x = grabbedPiece.piecePosition.x + xOffset;
+    nextPosition.y = grabbedPiece.piecePosition.y + yOffset;
+    while(isMoveInsideBoard(nextPosition))
+    {
+        if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition))
+        {
+            ps_append(validMoves, nextPosition);
+            break;
+        }
+        else if(isPositionFriendly(chessBoard, grabbedPiece, nextPosition)) break;
+        
+        ps_append(validMoves, nextPosition);
+        nextPosition.x += xOffset;
+        nextPosition.y += yOffset;
+    }
+
+    xOffset = 1;
+    yOffset = 1;
+    //diagonal bottom right
+    nextPosition.x = grabbedPiece.piecePosition.x + xOffset;
+    nextPosition.y = grabbedPiece.piecePosition.y + yOffset;
+    while(isMoveInsideBoard(nextPosition))
+    {
+        if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition))
+        {
+            ps_append(validMoves, nextPosition);
+            break;
+        }
+        else if(isPositionFriendly(chessBoard, grabbedPiece, nextPosition)) break;
+        
+        ps_append(validMoves, nextPosition);
+        nextPosition.x += xOffset;
+        nextPosition.y += yOffset;
+    }
+
+    xOffset = 1;
+    yOffset = -1;
+    //diagonal bottom right
+    nextPosition.x = grabbedPiece.piecePosition.x + xOffset;
+    nextPosition.y = grabbedPiece.piecePosition.y + yOffset;
+    while(isMoveInsideBoard(nextPosition))
+    {
+        if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition))
+        {
+            ps_append(validMoves, nextPosition);
+            break;
+        }
+        else if(isPositionFriendly(chessBoard, grabbedPiece, nextPosition)) break;
+        
+        ps_append(validMoves, nextPosition);
+        nextPosition.x += xOffset;
+        nextPosition.y += yOffset;
+    }
+
+    return validMoves;
+}
+
+ps_vector getValidRookMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece)
+{
+    ps_vector validMoves;
+    ps_init(validMoves);
+    Position nextPosition;
+    int xOffset = -1;
+    int yOffset = 0;
+    //Left move 
+    nextPosition.x = grabbedPiece.piecePosition.x + xOffset;
+    nextPosition.y = grabbedPiece.piecePosition.y;
+    while(isMoveInsideBoard(nextPosition))
+    {
+        if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition))
+        {
+            ps_append(validMoves, nextPosition);
+            break;
+        }
+        else if(isPositionFriendly(chessBoard, grabbedPiece, nextPosition)) break;
+        
+        ps_append(validMoves, nextPosition);
+        nextPosition.x += xOffset;
+    }
+    
+    xOffset = 1;
+    //Right move 
+    nextPosition.x = grabbedPiece.piecePosition.x + xOffset;
+    nextPosition.y = grabbedPiece.piecePosition.y;
+    while(isMoveInsideBoard(nextPosition))
+    {
+        if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition))
+        {
+            ps_append(validMoves, nextPosition);
+            break;
+        }
+        else if(isPositionFriendly(chessBoard, grabbedPiece, nextPosition)) break;
+        
+        ps_append(validMoves, nextPosition);
+        nextPosition.x += xOffset;
+    }
+
+    yOffset = 1;
+    //Bottom move
+    nextPosition.x = grabbedPiece.piecePosition.x;
+    nextPosition.y = grabbedPiece.piecePosition.y + yOffset;
+    while(isMoveInsideBoard(nextPosition))
+    {
+        if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition))
+        {
+            ps_append(validMoves, nextPosition);
+            break;
+        }
+        else if(isPositionFriendly(chessBoard, grabbedPiece, nextPosition)) break;
+        
+        ps_append(validMoves, nextPosition);
+        nextPosition.y += yOffset;
+    }
+
+    yOffset = -1;
+    //Top move
+    nextPosition.x = grabbedPiece.piecePosition.x;
+    nextPosition.y = grabbedPiece.piecePosition.y + yOffset;
+    while(isMoveInsideBoard(nextPosition))
+    {
+        if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition))
+        {
+            ps_append(validMoves, nextPosition);
+            break;
+        }
+        else if(isPositionFriendly(chessBoard, grabbedPiece, nextPosition)) break;
+        
+        ps_append(validMoves, nextPosition);
+        nextPosition.y += yOffset;
+    }
+
+    return validMoves;
+
+}
+
+ps_vector getValidQueenMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece)
+{
+    ps_vector validMoves;
+    ps_init(validMoves);
+    Position nextPosition;
+    int xOffset = -1;
+    int yOffset = 0;
+    //Left move 
+    nextPosition.x = grabbedPiece.piecePosition.x + xOffset;
+    nextPosition.y = grabbedPiece.piecePosition.y;
+    while(isMoveInsideBoard(nextPosition))
+    {
+        if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition))
+        {
+            ps_append(validMoves, nextPosition);
+            break;
+        }
+        else if(isPositionFriendly(chessBoard, grabbedPiece, nextPosition)) break;
+        
+        ps_append(validMoves, nextPosition);
+        nextPosition.x += xOffset;
+    }
+    
+    xOffset = 1;
+    //Right move 
+    nextPosition.x = grabbedPiece.piecePosition.x + xOffset;
+    nextPosition.y = grabbedPiece.piecePosition.y;
+    while(isMoveInsideBoard(nextPosition))
+    {
+        if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition))
+        {
+            ps_append(validMoves, nextPosition);
+            break;
+        }
+        else if(isPositionFriendly(chessBoard, grabbedPiece, nextPosition)) break;
+        
+        ps_append(validMoves, nextPosition);
+        nextPosition.x += xOffset;
+    }
+
+    yOffset = 1;
+    //Bottom move
+    nextPosition.x = grabbedPiece.piecePosition.x;
+    nextPosition.y = grabbedPiece.piecePosition.y + yOffset;
+    while(isMoveInsideBoard(nextPosition))
+    {
+        if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition))
+        {
+            ps_append(validMoves, nextPosition);
+            break;
+        }
+        else if(isPositionFriendly(chessBoard, grabbedPiece, nextPosition)) break;
+        
+        ps_append(validMoves, nextPosition);
+        nextPosition.y += yOffset;
+    }
+
+    yOffset = -1;
+    //Top move
+    nextPosition.x = grabbedPiece.piecePosition.x;
+    nextPosition.y = grabbedPiece.piecePosition.y + yOffset;
+    while(isMoveInsideBoard(nextPosition))
+    {
+        if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition))
+        {
+            ps_append(validMoves, nextPosition);
+            break;
+        }
+        else if(isPositionFriendly(chessBoard, grabbedPiece, nextPosition)) break;
+        
+        ps_append(validMoves, nextPosition);
+        nextPosition.y += yOffset;
+    }
+
+    xOffset = -1;
+    yOffset = -1;
+    //diagonal top left
+    nextPosition.x = grabbedPiece.piecePosition.x + xOffset;
+    nextPosition.y = grabbedPiece.piecePosition.y + yOffset;
+    while(isMoveInsideBoard(nextPosition))
+    {
+        if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition))
+        {
+            ps_append(validMoves, nextPosition);
+            break;
+        }
+        else if(isPositionFriendly(chessBoard, grabbedPiece, nextPosition)) break;
+        ps_append(validMoves, nextPosition);
+        nextPosition.x += xOffset;
+        nextPosition.y += yOffset;
+    }
+    
+    xOffset = -1;
+    yOffset = 1;
+    //diagonal bottom left
+    nextPosition.x = grabbedPiece.piecePosition.x + xOffset;
+    nextPosition.y = grabbedPiece.piecePosition.y + yOffset;
+    while(isMoveInsideBoard(nextPosition))
+    {
+        if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition))
+        {
+            ps_append(validMoves, nextPosition);
+            break;
+        }
+        else if(isPositionFriendly(chessBoard, grabbedPiece, nextPosition)) break;
+        
+        ps_append(validMoves, nextPosition);
+        nextPosition.x += xOffset;
+        nextPosition.y += yOffset;
+    }
+
+    xOffset = 1;
+    yOffset = 1;
+    //diagonal bottom right
+    nextPosition.x = grabbedPiece.piecePosition.x + xOffset;
+    nextPosition.y = grabbedPiece.piecePosition.y + yOffset;
+    while(isMoveInsideBoard(nextPosition))
+    {
+        if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition))
+        {
+            ps_append(validMoves, nextPosition);
+            break;
+        }
+        else if(isPositionFriendly(chessBoard, grabbedPiece, nextPosition)) break;
+        
+        ps_append(validMoves, nextPosition);
+        nextPosition.x += xOffset;
+        nextPosition.y += yOffset;
+    }
+
+    xOffset = 1;
+    yOffset = -1;
+    //diagonal bottom right
+    nextPosition.x = grabbedPiece.piecePosition.x + xOffset;
+    nextPosition.y = grabbedPiece.piecePosition.y + yOffset;
+    while(isMoveInsideBoard(nextPosition))
+    {
+        if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition))
+        {
+            ps_append(validMoves, nextPosition);
+            break;
+        }
+        else if(isPositionFriendly(chessBoard, grabbedPiece, nextPosition)) break;
+        
+        ps_append(validMoves, nextPosition);
+        nextPosition.x += xOffset;
+        nextPosition.y += yOffset;
+    }
+    
+    return validMoves;
+}
+
+ps_vector getValidKingMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece)
+{
+    ps_vector validMoves;
+    ps_init(validMoves);
+    
+    Position nextPosition;
+    //Left move 
+    nextPosition.x = grabbedPiece.piecePosition.x - 1;
+    nextPosition.y = grabbedPiece.piecePosition.y + 0;
+    
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition)
+    || isPositionEmpty(chessBoard, grabbedPiece, nextPosition)) 
+    ps_append(validMoves, nextPosition);
+    //Diagonal left top
+    nextPosition.x = grabbedPiece.piecePosition.x - 1;
+    nextPosition.y = grabbedPiece.piecePosition.y - 1;
+    
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition)
+    || isPositionEmpty(chessBoard, grabbedPiece, nextPosition)) 
+    ps_append(validMoves, nextPosition);
+    //Top
+    nextPosition.x = grabbedPiece.piecePosition.x - 0;
+    nextPosition.y = grabbedPiece.piecePosition.y - 1;
+    
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition)
+    || isPositionEmpty(chessBoard, grabbedPiece, nextPosition)) 
+    ps_append(validMoves, nextPosition);
+    //Diagonal top right
+    nextPosition.x = grabbedPiece.piecePosition.x + 1;
+    nextPosition.y = grabbedPiece.piecePosition.y - 1;
+    
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition)
+    || isPositionEmpty(chessBoard, grabbedPiece, nextPosition)) 
+    ps_append(validMoves, nextPosition);
+    //Right
+    nextPosition.x = grabbedPiece.piecePosition.x + 1;
+    nextPosition.y = grabbedPiece.piecePosition.y + 0;
+    
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition)
+    || isPositionEmpty(chessBoard, grabbedPiece, nextPosition)) 
+    ps_append(validMoves, nextPosition);
+    //Diagonal right down
+    nextPosition.x = grabbedPiece.piecePosition.x + 1;
+    nextPosition.y = grabbedPiece.piecePosition.y + 1;
+    
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition)
+    || isPositionEmpty(chessBoard, grabbedPiece, nextPosition)) 
+    ps_append(validMoves, nextPosition);
+    //down
+    nextPosition.x = grabbedPiece.piecePosition.x + 0;
+    nextPosition.y = grabbedPiece.piecePosition.y + 1;
+    
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition)
+    || isPositionEmpty(chessBoard, grabbedPiece, nextPosition)) 
+    ps_append(validMoves, nextPosition);
+    
+    nextPosition.x = grabbedPiece.piecePosition.x - 1;
+    nextPosition.y = grabbedPiece.piecePosition.y + 1;
+    
+    if(isPositionEnemy(chessBoard, grabbedPiece, nextPosition)
+    || isPositionEmpty(chessBoard, grabbedPiece, nextPosition)) 
+    ps_append(validMoves, nextPosition);
+    
+    return validMoves;
+}
+
+int isMoveInsideBoard(Position position)
 {
     if((position.x >= 0 && position.x < 8) && (position.y >= 0 && position.y < 8)) return 1;
     else return 0;
 }
 
-int isPositionEmpty(ChessBoard chessBoard, Position position)
+int isPositionFriendly(ChessBoard chessBoard,GrabbedPiece grabbedPiece, Position position)
 {
-    if(chessBoard.squares[position.x][position.y].piece.type == empty) return 1;
+    if(isMoveInsideBoard(position))
+    {
+        if(chessBoard.squares[position.x][position.y].piece.color == grabbedPiece.pieceColor) 
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
     else return 0;
 }
 
-
-int Abs(int val)
+int isPositionEnemy(ChessBoard chessBoard, GrabbedPiece grabbedPiece, Position position)
 {
-    if(val == 0) return 0;
-    if(val > 0) return val;
-    if(val < 0) return -val;
-    return 0;
+    if(isMoveInsideBoard(position))
+    {
+        if(grabbedPiece.pieceColor == white)
+        {
+            if(chessBoard.squares[position.x][position.y].piece.color == black) 
+            {
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        else
+        {
+            if(chessBoard.squares[position.x][position.y].piece.color == white) 
+            {
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+    }
+    else return 0;
+}
+
+int isPositionEmpty(ChessBoard chessBoard, GrabbedPiece grabbedPiece, Position position)
+{
+    
+    if(isMoveInsideBoard(position))
+    {
+        if(chessBoard.squares[position.x][position.y].piece.type == emptyType)
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    
+    }
+    else return 0;
+}
+float Abs(float val)
+{
+    if(val == 0.0) return 0.0;
+    if(val > 0.0) return val;
+    if(val < 0.0) return -val;
+    return 0.0;
 }

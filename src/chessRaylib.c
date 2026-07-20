@@ -44,7 +44,7 @@ void drawChessBoard(RaylibChessBoard raylibChessBoard, int mouseX, int mouseY)
         {
             switch(raylibChessBoard.chessBoardData.squares[i][j].piece.type)
             {
-                case empty:
+                case emptyType:
                     break;
                 case pawn:
                     if (raylibChessBoard.chessBoardData.squares[i][j].piece.color == white)

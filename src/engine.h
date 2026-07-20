@@ -3,7 +3,10 @@
 #include "raylib.h"
 
 #define SQUARE_SIZE 117
-
+#define LEFT_BOARD_EDGE 483
+#define RIGHT_BOARD_EDGE 70
+#define TOP_BOARD_EDGE 1419
+#define BOTTOM_BOARD_EDGE 1008
 typedef enum{
     pawn,
     knight,
@@ -12,7 +15,7 @@ typedef enum{
     queen,
     king,
     pieceTypeCount,
-    empty
+    emptyType
 }PieceType;
 
 typedef enum{
@@ -51,6 +54,7 @@ typedef struct {
     PieceType pieceType;
     PieceColor pieceColor;
     ps_vector possibleMoves;
+    int hasMoved;
 }GrabbedPiece;
 
 typedef struct {
@@ -70,27 +74,44 @@ typedef struct {
 			ps.capacity = 4;\
 		else\
 			ps.capacity *= 2;\
-		ps.data = realloc(ps.data, ps.capacity * sizeof(*ps.data));\
-		}\
+		Position* newData = realloc(ps.data, ps.capacity * sizeof(*ps.data));\
+		if(newData != NULL){\
+            (ps).data = newData;\
+        }\
+    }\
 	ps.data[ps.lenght++] = value;\
 }while(0)\
 
 #define ps_free(ps) do{\
 	free(ps.data);\
+    ps.data = NULL;\
+    ps.capacity = 0;\
+    ps.lenght = 0;\
 }while(0)\
 
 ChessBoard initChessBoard(void);
 void gameUpdate(ChessBoard* chessBoardData, GrabbedPiece* grabbedPieceData);
+int isMouseInsideBoard(Vector2 mousePos);
 void grabPiece(ChessBoard* chessBoard, Position closestSquare, GrabbedPiece* grabbedPieceData);
 void relasePiece(ChessBoard* chessBoard, Position closestSquare, Position piecePosition);
 Position checkClosestToMouse(ChessBoard chessBoard, Vector2 mousePos);
 int getPieceType(ChessBoard chessBoard, Position position);
 int getPieceColor(ChessBoard chessBoard, Position postion);
+int getPieceHasMoved(ChessBoard chessBoard, Position position);
 Piece choosePiece(PieceType type);
 ps_vector getValidMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece);
+ps_vector getValidWPawnMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece);
+ps_vector getValidBPawnMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece);
+ps_vector getValidKnightMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece);
+ps_vector getValidBishopMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece);
+ps_vector getValidRookMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece);
+ps_vector getValidQueenMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece);
+ps_vector getValidKingMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece);
 int isValidMove(ChessBoard chessBoard, Position closestSquare, GrabbedPiece grabbedPiece);
-int isInsideBoard(Position position);
-int isPositionEmpty(ChessBoard chessBoard, Position position);
-int Abs(int val);
+int isMoveInsideBoard(Position position);
+int isPositionFriendly(ChessBoard chessBoard, GrabbedPiece grabbedPiece, Position position);
+int isPositionEnemy(ChessBoard chessBoard, GrabbedPiece grabbedPiece, Position position);
+int isPositionEmpty(ChessBoard chessBoard, GrabbedPiece grabbedPiece, Position position);
+float Abs(float val);
 
 #endif // ENGINE_H
