@@ -97,7 +97,8 @@ typedef struct{
 
 GameState initGameState(void);
 ChessBoard initChessBoard(void);
-void gameUpdate(ChessBoard* chessBoardData, GrabbedPiece* grabbedPieceData);
+void gameUpdate(ChessBoard* chessBoardData, GameState* gameState, GrabbedPiece* grabbedPieceData);
+void changePlayer(GameState* gameState);
 int isMouseInsideBoard(Vector2 mousePos);
 void grabPiece(ChessBoard* chessBoard, Position closestSquare, GrabbedPiece* grabbedPieceData);
 void relasePiece(ChessBoard* chessBoard, Position closestSquare, Position piecePosition);
@@ -106,7 +107,7 @@ int getPieceType(ChessBoard chessBoard, Position position);
 int getPieceColor(ChessBoard chessBoard, Position postion);
 int getPieceHasMoved(ChessBoard chessBoard, Position position);
 Piece choosePiece(PieceType type);
-int isValidMove(ChessBoard chessBoard, Position closestSquare, GrabbedPiece grabbedPiece);
+int isValidMove(ChessBoard chessBoard, GameState gameState, Position closestSquare, GrabbedPiece grabbedPiece);
 int isMoveInsideBoard(Position position);
 int isPositionFriendly(ChessBoard chessBoard, GrabbedPiece grabbedPiece, Position position);
 int isPositionEnemy(ChessBoard chessBoard, GrabbedPiece grabbedPiece, Position position);

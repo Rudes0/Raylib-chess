@@ -1,5 +1,4 @@
 #include "engine.h"
-#include "chessRaylib.h"
 #include "moves.h"
 #include <raylib.h>
 #include <stdio.h>
@@ -153,7 +152,7 @@ ChessBoard initChessBoard(void)
     return chessBoard;
 }
 
-void gameUpdate(ChessBoard* chessBoardData, GrabbedPiece* grabbedPieceData)
+void gameUpdate(ChessBoard* chessBoardData, GameState* gameState, GrabbedPiece* grabbedPieceData)
 {
     Vector2 mousePostion;
     mousePostion.x = GetMouseX();
@@ -174,9 +173,10 @@ void gameUpdate(ChessBoard* chessBoardData, GrabbedPiece* grabbedPieceData)
             {
                 printf("Relasing not empty piece on square x %d, y %d\n", closestSquare.x, closestSquare.y);
                 if(!isMouseInsideBoard(mousePostion)) relasePiece(chessBoardData, grabbedPieceData->piecePosition, grabbedPieceData->piecePosition);
-                else if(isValidMove(*chessBoardData, closestSquare, *grabbedPieceData))
+                else if(isValidMove(*chessBoardData, *gameState, closestSquare, *grabbedPieceData))
                 {
                     relasePiece(chessBoardData, closestSquare, grabbedPieceData->piecePosition);
+                    changePlayer(gameState);
                 }
                 else
                 {
@@ -193,6 +193,18 @@ void gameUpdate(ChessBoard* chessBoardData, GrabbedPiece* grabbedPieceData)
     else
     {
 
+    }
+}
+
+void changePlayer(GameState *gameState)
+{
+    if(gameState->currentPlayerColor == white)
+    {
+        gameState->currentPlayerColor = black;
+    }
+    else
+    {
+        gameState->currentPlayerColor = white;
     }
 }
 
@@ -271,8 +283,9 @@ int getPieceHasMoved(ChessBoard chessBoard, Position position)
     return chessBoard.squares[position.x][position.y].piece.hasMoved;
 }
 
-int isValidMove(ChessBoard chessBoard, Position closestSquare, GrabbedPiece grabbedPiece)
+int isValidMove(ChessBoard chessBoard, GameState gameState, Position closestSquare, GrabbedPiece grabbedPiece)
 {
+    if(gameState.currentPlayerColor != grabbedPiece.pieceColor) return 0;
     if(grabbedPiece.possibleMoves.data == NULL) return 0;
     for(int i = 0; i < grabbedPiece.possibleMoves.lenght; ++i)
     {

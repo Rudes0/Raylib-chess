@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include "src/engine.h"
 #include "src/game.h"
 #include <stdio.h>
 
@@ -27,7 +28,7 @@ int main(void)
     {
         // Update
         //----------------------------------------------------------------------------------
-        gameUpdate(&chessGame.chessBoard, &chessGame.grabbedPieceData);
+        gameUpdate(&chessGame.chessBoard, &chessGame.gameState, &chessGame.grabbedPieceData);
         int mouseX = GetMouseX();
         int mouseY = GetMouseY(); 
         //----------------------------------------------------------------------------------
