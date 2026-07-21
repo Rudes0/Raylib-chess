@@ -1,6 +1,5 @@
 #include "raylib.h"
-#include "src/chessRaylib.h"
-#include "src/engine.h"
+#include "src/game.h"
 #include <stdio.h>
 
 //------------------------------------------------------------------------------------
@@ -17,8 +16,9 @@ int main(void)
     //image is 1080x1080px
     InitWindow(0, 0, "raylib [core] example - basic window");
     ToggleBorderlessWindowed();   
-    RaylibChessBoard board;
-    loadChessBoard(&board);
+    Game chessGame;
+    initGame(&chessGame);
+    loadChessBoard(&chessGame.raylibChessBoard);
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
@@ -27,7 +27,7 @@ int main(void)
     {
         // Update
         //----------------------------------------------------------------------------------
-        gameUpdate(&board.chessBoardData, &board.grabbedPieceData);
+        gameUpdate(&chessGame.chessBoard, &chessGame.grabbedPieceData);
         int mouseX = GetMouseX();
         int mouseY = GetMouseY(); 
         //----------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ int main(void)
         //----------------------------------------------------------------------------------
         BeginDrawing();
             ClearBackground(RAYWHITE);
-            drawChessBoard(board, mouseX - SQUARE_SIZE / 2, mouseY - SQUARE_SIZE / 2);
+            drawChessBoard(chessGame.raylibChessBoard, chessGame.chessBoard, mouseX - SQUARE_SIZE / 2, mouseY - SQUARE_SIZE / 2);
         EndDrawing();
         //----------------------------------------------------------------------------------
     }
@@ -43,7 +43,7 @@ int main(void)
     // De-Initialization
     //--------------------------------------------------------------------------------------
     
-    unloadChessBoard(&board);
+    unloadChessBoard(&chessGame.raylibChessBoard);
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 

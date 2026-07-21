@@ -4,14 +4,11 @@
 
 
 typedef struct {
-    ChessBoard chessBoardData;
-    GrabbedPiece grabbedPieceData;
     Texture2D chessBoardTexture;
     Texture2D chessPieces[pieceColorCount][pieceTypeCount];
 }RaylibChessBoard;
 
 void loadChessBoard(RaylibChessBoard* raylibChessBoard); // Initialization of all the textures of chess board
-void drawChessBoard(RaylibChessBoard raylibChessBoard, int mouseX, int mouseY); // update textures of chess board
+void drawChessBoard(RaylibChessBoard raylibChessBoard, ChessBoard chessBoard, int mouseX, int mouseY); // update textures of chess board
 void unloadChessBoard(RaylibChessBoard* raylibChessBoard);
-void drawsome(int a);
 #endif //CHESS_RAYLIB_H

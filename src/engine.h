@@ -61,6 +61,12 @@ typedef struct {
     Square squares[8][8];
 }ChessBoard; 
 
+typedef struct{
+    PieceColor currentPlayerColor;
+    float whiteTime;
+    float blackTime;
+}GameState;
+
 // macros for ps_vector
 #define ps_init(ps) do{\
 	ps.capacity = 4;\
@@ -89,6 +95,7 @@ typedef struct {
     ps.lenght = 0;\
 }while(0)\
 
+GameState initGameState(void);
 ChessBoard initChessBoard(void);
 void gameUpdate(ChessBoard* chessBoardData, GrabbedPiece* grabbedPieceData);
 int isMouseInsideBoard(Vector2 mousePos);
@@ -99,14 +106,6 @@ int getPieceType(ChessBoard chessBoard, Position position);
 int getPieceColor(ChessBoard chessBoard, Position postion);
 int getPieceHasMoved(ChessBoard chessBoard, Position position);
 Piece choosePiece(PieceType type);
-ps_vector getValidMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece);
-ps_vector getValidWPawnMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece);
-ps_vector getValidBPawnMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece);
-ps_vector getValidKnightMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece);
-ps_vector getValidBishopMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece);
-ps_vector getValidRookMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece);
-ps_vector getValidQueenMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece);
-ps_vector getValidKingMoves(ChessBoard chessBoard, GrabbedPiece grabbedPiece);
 int isValidMove(ChessBoard chessBoard, Position closestSquare, GrabbedPiece grabbedPiece);
 int isMoveInsideBoard(Position position);
 int isPositionFriendly(ChessBoard chessBoard, GrabbedPiece grabbedPiece, Position position);
